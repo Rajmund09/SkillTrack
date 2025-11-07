@@ -1,88 +1,76 @@
 import pandas as pd
-from flask import Flask, render_template, request, jsonify,send_from_directory
+from flask import Flask, render_template, request, jsonify, send_from_directory
 
-
+# Import custom modules
 from scraper import fetch_job_data, saveing_csv
 from database import create_database, create_table, insert_jobs
 from Visualize_skills import create_skills_chart, create_locations_chart, create_experience_chart
 from Suggest import recommend_skills
 
+# Initialize Flask app
 app = Flask(__name__)
 
 @app.route("/")
 def home():
-    """
-    Renders the main HTML page (the "face").
-    """
+    """Render the main landing/dashboard page."""
     return render_template("index.html")
 
 @app.route("/download-csv")
 def download_csv():
-    """
-    Provides the 'job_data.csv' file for download.
-    """
-    print("Download request received for CSV...")
+    """Download the scraped job data CSV."""
     try:
-       
-        return send_from_directory(
-            'data', 'job_data.csv', as_attachment=True
-        )
+        return send_from_directory('data', 'job_data.csv', as_attachment=True)
     except FileNotFoundError:
-        return "Error: File not found. Please run a search first.", 404
+        return "⚠ File not found. Please search job data first.", 404
 
 @app.route("/search", methods=["POST"])
 def search():
-    """
-    The "brain function" that runs when the user clicks "Search."
-    """
-    print("Search request received...")
+    """Fetch job data based on user input, analyze, and return results."""
     try:
         data = request.get_json()
         job_role = data.get('role')
         user_skills = data.get('user_skills')
 
         if not job_role:
-            return jsonify({'error': 'No job role provided.'}), 400
+            return jsonify({'error': 'Job role is required!'}), 400
 
-        print(f"Fetching jobs for: {job_role}")
+        print(f"🔎 Fetching job data for role: {job_role}")
         job_data = fetch_job_data(job_role)
+
         if not job_data:
-            return jsonify({'error': 'No jobs found for this role.'})
-        
-        print("Saving data to CSV and Database...")
+            return jsonify({'error': 'No jobs found for this role.'}), 404
+
+        # Save Data
         saveing_csv(job_data)
         create_database()
         create_table()
         insert_jobs(job_data)
-        print("Data saved.")
-        
-        print("Converting to DataFrame for analysis...")
+
+        # Convert to DataFrame
         df = pd.DataFrame(job_data)
 
-        print("Generating charts...")
-        skill_chart_comps = create_skills_chart(df)
-        loc_chart_comps = create_locations_chart(df)
-        exp_chart_comps = create_experience_chart(df)
+        # Generate Charts
+        skill_chart = create_skills_chart(df)
+        loc_chart = create_locations_chart(df)
+        exp_chart = create_experience_chart(df)
 
-        print("Generating suggestions...")
+        # Generate Skill Suggestions
         suggestions = recommend_skills(user_skills, df)
 
-        print("Sending all data back to frontend.")
+        # Return All Results
         return jsonify({
-            'message': f'Found {len(job_data)} jobs.',
-            'skill_chart_script': skill_chart_comps[0] if skill_chart_comps else None,
-            'skill_chart_div': skill_chart_comps[1] if skill_chart_comps else "<p>No skill data.</p>",
-            'loc_chart_script': loc_chart_comps[0] if loc_chart_comps else None,
-            'loc_chart_div': loc_chart_comps[1] if loc_chart_comps else "<p>No location data.</p>",
-            'exp_chart_script': exp_chart_comps[0] if exp_chart_comps else None,
-            'exp_chart_div': exp_chart_comps[1] if exp_chart_comps else "<p>No experience data.</p>",
+            'message': f'Found {len(job_data)} job postings.',
+            'skill_chart_script': skill_chart[0] if skill_chart else None,
+            'skill_chart_div': skill_chart[1] if skill_chart else "<p>No data available.</p>",
+            'loc_chart_script': loc_chart[0] if loc_chart else None,
+            'loc_chart_div': loc_chart[1] if loc_chart else "<p>No data available.</p>",
+            'exp_chart_script': exp_chart[0] if exp_chart else None,
+            'exp_chart_div': exp_chart[1] if exp_chart else "<p>No data available.</p>",
             'suggestions': suggestions
         })
-
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print(f"❌ Error: {e}")
         return jsonify({'error': str(e)}), 500
 
-
 if __name__ == "__main__":
-    app.run(debug=True) 
+    app.run(debug=True)
