@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillTrack - Job Market Analytics</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.bokeh.org/bokeh/release/bokeh-3.8.0.min.js"></script>
+</head>
+
+<body>
+    <div class="background-animation">
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+    </div>
+
+    <div id="landing-page">
+        <div class="logo">
+            <h1>CareerCompass</h1>
+            <p>Analyze job market trends, identify in-demand skills, and optimize your career path with data-driven
+                insights</p>
+        </div>
+
+        <div class="features">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3>Market Analysis</h3>
+                <p>Get real-time insights into job market trends and skill demands across industries</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-bullseye"></i>
+                </div>
+                <h3>Skill Matching</h3>
+                <p>Compare your skills with market demands and identify areas for improvement</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-lightbulb"></i>
+                </div>
+                <h3>Career Guidance</h3>
+                <p>Receive personalized recommendations to boost your employability</p>
+            </div>
+        </div>
+
+        <div class="cta-section">
+            <a href="#" class="cta-button" id="start-analyze">
+                <i class="fas fa-rocket"></i> Start Analyze
+            </a>
+        </div>
+    </div>
+
+    <div id="dashboard-page">
+        <div class="back-button">
+            <button class="back-btn glass" id="back-button">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+        </div>
+
+        <div class="sidebar-dropdown">
+            <button class="dropdown-btn glass">
+                <i class="fas fa-cog"></i>
+            </button>
+            <div class="dropdown-content glass">
+                <h4>Dashboard Options</h4>
+                <p>Customize your experience</p>
+                <div class="dropdown-option">
+                    <i class="fas fa-chart-line"></i>
+                    <span>View Analytics</span>
+                </div>
+                <div class="dropdown-option">
+                    <i class="fas fa-download"></i>
+                    <span>Export Data</span>
+                </div>
+                <div class="dropdown-option">
+                    <i class="fas fa-palette"></i>
+                    <span>Change Theme</span>
+                </div>
+                <div class="dropdown-option">
+                    <i class="fas fa-question-circle"></i>
+                    <span>Help & Support</span>
+                </div>
+            </div>
+        </div>
+
+        <header>
+            <h1>SkillTrack Dashboard</h1>
+            <p>Analyze job market trends and skill requirements</p>
+        </header>
+
+        <div id="search-controls" class="glass">
+            <div class="search-container">
+                <div class="input-group">
+                    <input type="text" id="job-role" placeholder="Enter job role (e.g., Python Developer)">
+                    <div class="suggestions-dropdown" id="role-suggestions">
+                        <div class="suggestion-item">Python Developer</div>
+                        <div class="suggestion-item">Data Scientist</div>
+                        <div class="suggestion-item">Web Developer</div>
+                        <div class="suggestion-item">Machine Learning Engineer</div>
+                        <div class="suggestion-item">Software Engineer</div>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="user-skills" placeholder="Enter your skills (e.g., python, react, git)">
+                    <div class="suggestions-dropdown" id="skill-suggestions">
+                        <div class="suggestion-item">Python</div>
+                        <div class="suggestion-item">JavaScript</div>
+                        <div class="suggestion-item">React</div>
+                        <div class="suggestion-item">SQL</div>
+                        <div class="suggestion-item">Git</div>
+                        <div class="suggestion-item">Docker</div>
+                        <div class="suggestion-item">AWS</div>
+                    </div>
+                </div>
+
+                <!-- Add this after your existing search container -->
+                <div class="advanced-filters" id="advanced-filters">
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label for="location">Location (Optional)</label>
+                            <input type="text" id="location" placeholder="e.g., Bangalore, Remote">
+                        </div>
+                        <div class="filter-group">
+                            <label for="experience-level">Experience Level (Optional)</label>
+                            <select id="experience-level">
+                                <option value="">Any Experience</option>
+                                <option value="fresher">Fresher</option>
+                                <option value="0-2">0-2 years</option>
+                                <option value="2-5">2-5 years</option>
+                                <option value="5-10">5-10 years</option>
+                                <option value="10+">10+ years</option>
+                            </select>
+                        </div>
+                       
+                    </div>
+                </div>
+
+                <button class="filter-toggle" id="filter-toggle">
+                    <i class="fas fa-filter"></i> Advanced Filters
+                </button>
+                <button id="search-button">
+                    <i class="fas fa-search"></i>
+                    Analyze Skills
+                </button>
+            </div>
+        </div>
+
+        <div id="loading" class="glass">
+            <p><i class="fas fa-spinner fa-spin"></i> Scraping job data... Analyzing skills... This may take a moment...
+            </p>
+        </div>
+
+        <div id="dashboard">
+            <div class="chart-section">
+                <div class="chart-container glass" id="skill-chart">
+                    <h3><i class="fas fa-fire"></i> Top Skills in Demand</h3>
+                    <p class="chart-placeholder">Enter a job role to see the most demanded skills</p>
+                </div>
+                <div class="chart-container glass" id="exp-chart">
+                    <h3><i class="fas fa-briefcase"></i> Experience Level Distribution</h3>
+                    <p class="chart-placeholder">Experience requirements will appear here</p>
+                </div>
+                <div class="chart-container glass" id="loc-chart">
+                    <h3><i class="fas fa-map-marker-alt"></i> Job Locations</h3>
+                    <p class="chart-placeholder">Geographic distribution of jobs will appear here</p>
+                </div>
+            </div>
+
+            <div id="suggestions">
+                <div class="chart-container glass">
+                    <h3><i class="fas fa-chart-pie"></i> Your Skill Report</h3>
+                    <div id="speedometer">
+                        <div class="score" id="score-percent">0%</div>
+                        <div class="score-text" id="score-text">Enter your skills to see your match percentage</div>
+                    </div>
+                </div>
+                <div class="chart-container glass">
+                    <h3><i class="fas fa-lightbulb"></i> Recommended Skills to Learn</h3>
+                    <ul id="missing-skills-list">
+                        <li>No data yet. Analyze your skills to get recommendations.</li>
+                    </ul>
+                </div>
+                <div class="chart-container glass">
+                    <h3><i class="fas fa-graduation-cap"></i> Ready to Learn?</h3>
+                    <p>Visit my official website for high-quality courses to master these in-demand skills!</p>
+                    <a href="https://course-website-smoky.vercel.app/" target="_blank" class="course-button">
+                        Visit My Courses
+                        <i class="fas fa-external-link-alt"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="initial-loader">
+        <div class="loader-spinner"></div>
+        <div class="loader-text">Loading SkillTrack Dashboard...</div>
+    </div>
+
+    <script>
+        window.addEventListener('load', function () {
+            setTimeout(function () {
+                document.getElementById('initial-loader').style.opacity = '0';
+                setTimeout(function () {
+                    document.getElementById('initial-loader').style.display = 'none';
+                }, 500);
+            }, 1500);
+
+            initPageNavigation();
+
+            initDropdowns();
+            initSuggestionDropdowns();
+        });
+
+        function initPageNavigation() {
+            const startAnalyzeBtn = document.getElementById('start-analyze');
+            const backButton = document.getElementById('back-button');
+            const landingPage = document.getElementById('landing-page');
+            const dashboardPage = document.getElementById('dashboard-page');
+
+            startAnalyzeBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                landingPage.style.display = 'none';
+                dashboardPage.style.display = 'block';
+            });
+
+            backButton.addEventListener('click', function () {
+                dashboardPage.style.display = 'none';
+                landingPage.style.display = 'flex';
+            });
+        }
+
+
+        function initDropdowns() {
+            const dropdownBtn = document.querySelector('.dropdown-btn');
+            const dropdownContent = document.querySelector('.dropdown-content');
+
+            dropdownBtn.addEventListener('click', function () {
+                dropdownContent.classList.toggle('show');
+            });
+
+            window.addEventListener('click', function (e) {
+                if (!e.target.closest('.dropdown-btn') && !e.target.closest('.dropdown-content')) {
+                    if (dropdownContent.classList.contains('show')) {
+                        dropdownContent.classList.remove('show');
+                    }
+                }
+            });
+            const options = document.querySelectorAll('.dropdown-option');
+            options.forEach(option => {
+                option.addEventListener('click', function () {
+                    const action = option.querySelector('span').textContent;
+
+                    if (action === 'Export Data') {
+                        window.location.href = '/download-csv';
+                    } else if (action === 'Change Theme') {
+                        alert('Theme switching coming soon!');
+                    } else if (action === 'View Analytics') {
+                        alert('You are already viewing analytics!');
+                    } else if (action === 'Help & Support') {
+                        alert('Help & Support coming soon!');
+                    }
+
+                    dropdownContent.classList.remove('show');
+                });
+            });
+        }
+
+        function initSuggestionDropdowns() {
+            const jobRoleInput = document.getElementById('job-role');
+            const userSkillsInput = document.getElementById('user-skills');
+            const roleSuggestions = document.getElementById('role-suggestions');
+            const skillSuggestions = document.getElementById('skill-suggestions');
+
+            jobRoleInput.addEventListener('focus', function () {
+                roleSuggestions.style.display = 'block';
+            });
+
+            jobRoleInput.addEventListener('blur', function () {
+                setTimeout(() => {
+                    roleSuggestions.style.display = 'none';
+                }, 200);
+            });
+
+            userSkillsInput.addEventListener('focus', function () {
+                skillSuggestions.style.display = 'block';
+            });
+
+            userSkillsInput.addEventListener('blur', function () {
+                setTimeout(() => {
+                    skillSuggestions.style.display = 'none';
+                }, 200);
+            });
+
+
+            document.querySelectorAll('.suggestion-item').forEach(item => {
+                item.addEventListener('mousedown', function () {
+                    if (this.parentElement.id === 'role-suggestions') {
+                        jobRoleInput.value = this.textContent;
+                        roleSuggestions.style.display = 'none';
+                    } else {
+
+                        const currentSkills = userSkillsInput.value;
+                        if (currentSkills) {
+                            userSkillsInput.value = currentSkills + ', ' + this.textContent.toLowerCase();
+                        } else {
+                            userSkillsInput.value = this.textContent.toLowerCase();
+                        }
+                        skillSuggestions.style.display = 'none';
+                    }
+                });
+            });
+        }
+
+        const searchButton = document.getElementById('search-button');
+        const jobRoleInput = document.getElementById('job-role');
+        const userSkillsInput = document.getElementById('user-skills');
+        const loadingText = document.getElementById('loading');
+
+        const skillChartDiv = document.getElementById('skill-chart');
+        const locChartDiv = document.getElementById('loc-chart');
+        const expChartDiv = document.getElementById('exp-chart');
+
+        const scorePercent = document.getElementById('score-percent');
+        const scoreText = document.getElementById('score-text');
+        const missingList = document.getElementById('missing-skills-list');
+
+        searchButton.onclick = async function () {
+            const jobRole = jobRoleInput.value;
+            const userSkills = userSkillsInput.value;
+            const location = document.getElementById('location').value;
+            const experienceLevel = document.getElementById('experience-level').value;
+
+            if (!jobRole) {
+                alert('Please enter a job role.');
+                return;
+            }
+
+            loadingText.style.display = 'block';
+            skillChartDiv.innerHTML = '<h3><i class="fas fa-fire"></i> Top Skills in Demand</h3><p>Loading...</p>';
+            locChartDiv.innerHTML = '<h3><i class="fas fa-map-marker-alt"></i> Job Locations</h3><p>Loading...</p>';
+            expChartDiv.innerHTML = '<h3><i class="fas fa-briefcase"></i> Experience Level Distribution</h3><p>Loading...</p>';
+            scorePercent.innerText = '...';
+            scoreText.innerText = 'Analyzing...';
+            missingList.innerHTML = '<li>Analyzing...</li>';
+
+            try {
+                const response = await fetch('/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        'role': jobRole,
+                        'user_skills': userSkills,
+                        'location': location,
+                        'experience_level': experienceLevel,
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Server returned an error.');
+                }
+                const data = await response.json();
+
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+
+                loadingText.style.display = 'none';
+
+                skillChartDiv.innerHTML = data.skill_chart_div;
+                if (data.skill_chart_script) {
+                    const scriptTag = document.createRange().createContextualFragment(data.skill_chart_script);
+                    document.body.appendChild(scriptTag);
+                }
+
+                locChartDiv.innerHTML = data.loc_chart_div;
+                if (data.loc_chart_script) {
+                    const scriptTag = document.createRange().createContextualFragment(data.loc_chart_script);
+                    document.body.appendChild(scriptTag);
+                }
+
+                expChartDiv.innerHTML = data.exp_chart_div;
+                if (data.exp_chart_script) {
+                    const scriptTag = document.createRange().createContextualFragment(data.exp_chart_script);
+                    document.body.appendChild(scriptTag);
+                }
+
+                const suggestions = data.suggestions;
+                scorePercent.innerText = suggestions.score + '%';
+                scoreText.innerText = `You have ${suggestions.match_count} out of the ${suggestions.total_top_skills} top skills.`;
+
+                missingList.innerHTML = '';
+                if (suggestions.missing_skills.length === 0) {
+                    missingList.innerHTML = '<li>🏆 Great job! You have all the top skills!</li>';
+                } else {
+                    suggestions.missing_skills.forEach(item => {
+                        const li = document.createElement('li');
+                        li.innerText = `${item[0].capitalize()} (in ${item[1]} jobs)`;
+                        missingList.appendChild(li);
+                    });
+                }
+
+            } catch (error) {
+                loadingText.style.display = 'none';
+                alert('An error occurred: ' + error.message);
+            }
+        };
+
+        String.prototype.capitalize = function () {
+            return this.charAt(0).toUpperCase() + this.slice(1);
+        }
+
+        // Add filter toggle functionality
+const filterToggle = document.getElementById('filter-toggle');
+const advancedFilters = document.getElementById('advanced-filters');
+
+filterToggle.addEventListener('click', function() {
+    if (advancedFilters.style.display === 'block') {
+        advancedFilters.style.display = 'none';
+        filterToggle.innerHTML = '<i class="fas fa-filter"></i> Advanced Filters';
+    } else {
+        advancedFilters.style.display = 'block';
+        filterToggle.innerHTML = '<i class="fas fa-times"></i> Hide Filters';
+    }
+});
+    </script>
+</body>
+
+</html>

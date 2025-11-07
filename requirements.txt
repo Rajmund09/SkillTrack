@@ -1,0 +1,10 @@
+Flask
+pandas
+requests
+beautifulsoup4
+mysql-connector-python
+selenium
+webdriver-manager
+plotly
+dash
+bokeh

@@ -1,0 +1,18 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Virtual environments
+venv/
+.env/
+
+# Database
+*.db
+*.sqlite3
+
+# Logs or temp files
+*.log
+*.tmp
+
+# Selenium driver (if downloaded)
+chromedriver.exe
