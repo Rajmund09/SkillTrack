@@ -9,7 +9,6 @@ def analyze_skills():
     """
     Reads the CSV, splits the skills, and counts the most common ones.
     """
-    
     if not os.path.exists(CSV_FILE):
         print(f"Error: File not found at {CSV_FILE}")
         print("Please run Scraper.py first to create the data file.")
